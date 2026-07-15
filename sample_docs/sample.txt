@@ -1,0 +1,7 @@
+Photosynthesis is the process by which green plants, algae, and some bacteria convert light energy into chemical energy stored in glucose. This process primarily occurs in the chloroplasts of plant cells, specifically within structures called thylakoids that contain the pigment chlorophyll.
+
+The overall process can be summarized in two main stages: the light-dependent reactions and the light-independent reactions (also called the Calvin cycle). During the light-dependent reactions, sunlight is absorbed by chlorophyll and used to split water molecules, releasing oxygen as a byproduct and generating energy carriers ATP and NADPH.
+
+In the Calvin cycle, which takes place in the stroma of the chloroplast, the ATP and NADPH produced earlier are used to convert carbon dioxide into glucose through a series of enzymatic reactions. This cycle does not require light directly, which is why it is sometimes called the "dark reactions," though it typically occurs during the day when the products of the light reactions are available.
+
+Photosynthesis is critical for life on Earth because it is the primary source of oxygen in the atmosphere and forms the base of most food chains, converting solar energy into a form that other organisms can consume and use.
