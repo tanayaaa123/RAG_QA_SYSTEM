@@ -1,134 +1,247 @@
-# 📄 Document Q&A — A RAG (Retrieval-Augmented Generation) System
+# Document Q&A System using Retrieval-Augmented Generation (RAG)
 
-Upload PDFs or text files and ask questions about them in plain English. The system retrieves the most relevant passages and uses an LLM to generate an answer **grounded in your documents**, with sources shown for every answer.
+A Retrieval-Augmented Generation (RAG) application that enables users to upload documents and ask natural-language questions about their content.
 
-This is a from-scratch implementation of the RAG pattern used in production systems like customer-support bots, internal knowledge search, and document assistants.
+The system combines semantic search using FAISS and Sentence Transformers with Google's Gemini API to generate accurate, context-aware answers grounded in the uploaded documents.
 
 ---
 
-## Why this project
+## Features
 
-Most fresher ML portfolios are all classification/regression on tabular data (fraud detection, churn, etc.). RAG demonstrates a different, currently in-demand skill set:
-
-- Working with **embeddings** and **vector search** (not just scikit-learn models)
-- Understanding how LLMs are grounded in external knowledge to reduce hallucination
-- Building a real, deployable pipeline: ingestion → chunking → retrieval → generation
-- Comfort with the modern GenAI stack (the thing most companies are actively hiring for)
+* Upload and process PDF and TXT documents
+* Automatic document chunking with overlap
+* Semantic search using vector embeddings
+* FAISS-powered similarity retrieval
+* Context-aware answer generation using Google Gemini
+* Source chunk attribution for transparency
+* Interactive Streamlit web interface
+* Modular and scalable architecture
 
 ---
 
 ## Architecture
 
+```text
+User Uploads Document
+        │
+        ▼
+Document Loader (PDF/TXT)
+        │
+        ▼
+Text Chunking
+        │
+        ▼
+Sentence Transformer Embeddings
+(all-MiniLM-L6-v2)
+        │
+        ▼
+FAISS Vector Store
+        │
+        ▼
+User Question
+        │
+        ▼
+Question Embedding
+        │
+        ▼
+Similarity Search
+        │
+        ▼
+Top Relevant Chunks
+        │
+        ▼
+Context + User Query
+        │
+        ▼
+Google Gemini
+        │
+        ▼
+Generated Answer
 ```
- ┌─────────────┐     ┌───────────┐     ┌──────────────┐     ┌─────────────┐
- │  Upload PDF │ --> │  Chunk    │ --> │  Embed with  │ --> │  Store in   │
- │  / TXT file │     │  text     │     │  MiniLM      │     │  FAISS index│
- └─────────────┘     └───────────┘     └──────────────┘     └─────────────┘
-                                                                     │
-                                                                     ▼
- ┌─────────────┐     ┌───────────┐     ┌──────────────┐     ┌─────────────┐
- │   Answer    │ <-- │  Claude   │ <-- │  Prompt with │ <-- │  User asks  │
- │  + sources  │     │ generates │     │  retrieved   │     │  a question │
- │             │     │  answer   │     │  chunks      │     │             │
- └─────────────┘     └───────────┘     └──────────────┘     └─────────────┘
-```
-
-**Retrieval** (finding relevant text) is separate from **generation** (writing the answer) — that separation is the core idea of RAG, and it's what lets the model answer using information it was never trained on.
 
 ---
 
-## Tech stack
+## Tech Stack
 
-| Component | Tool | Why |
-|---|---|---|
-| Embeddings | `sentence-transformers` (all-MiniLM-L6-v2) | Free, runs locally on CPU, no API cost |
-| Vector store | `FAISS` | Free, fast, industry-standard for similarity search |
-| LLM | Anthropic Claude API | Generates the final grounded answer |
-| UI | Streamlit | Fast to build, easy to deploy, looks professional |
-| PDF parsing | `pypdf` | Lightweight, no external dependencies |
+| Component           | Technology            |
+| ------------------- | --------------------- |
+| Frontend            | Streamlit             |
+| LLM                 | Google Gemini         |
+| Embeddings          | Sentence Transformers |
+| Embedding Model     | all-MiniLM-L6-v2      |
+| Vector Search       | FAISS                 |
+| Document Processing | PyPDF                 |
+| Language            | Python                |
 
 ---
 
-## Project structure
+## Project Structure
 
-```
+```text
 rag_qa_system/
-├── app.py              # Streamlit UI (upload, ask, view answers + sources)
-├── rag_pipeline.py      # Core logic: loading, chunking, embedding, retrieval, generation
-├── requirements.txt      # Python dependencies
-├── sample_docs/
-│   └── sample.txt        # A sample document to test with immediately
+│
+├── app.py                 # Streamlit application
+├── rag_pipeline.py        # RAG pipeline implementation
+├── requirements.txt       # Dependencies
+├── sample_docs/           # Sample documents
+├── .gitignore
 └── README.md
 ```
 
-`app.py` contains **no business logic** — it only handles UI. All the actual RAG logic lives in `rag_pipeline.py` and can be tested or reused independently (e.g., in a Jupyter notebook, or swapped into a FastAPI backend later). This separation is intentional and worth mentioning in an interview — it shows you think about code structure, not just "make it work."
+---
+
+## How It Works
+
+1. User uploads one or more documents.
+2. Documents are loaded and parsed.
+3. Text is split into manageable chunks.
+4. Embeddings are generated for each chunk.
+5. Chunks are indexed using FAISS.
+6. User submits a question.
+7. The system retrieves the most relevant chunks.
+8. Retrieved context is sent to Gemini.
+9. Gemini generates an answer based on the retrieved information.
 
 ---
 
-## Setup (run locally)
+## Installation
 
-**1. Clone / download this folder, then install dependencies:**
+### Clone the Repository
 
 ```bash
-cd rag_qa_system
+git clone https://github.com/tanayaaa123/RAG_QA_SYSTEM.git
+cd RAG_QA_SYSTEM
+```
+
+### Create a Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+Linux/macOS:
+
+```bash
+source venv/bin/activate
+```
+
+### Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-**2. Get a free Anthropic API key:**
+---
 
-- Go to https://console.anthropic.com
-- Sign up, create an API key (there's a free trial credit)
+## Environment Setup
 
-**3. Run the app:**
+Create a `.env` file in the project root:
+
+```env
+GOOGLE_API_KEY=your_api_key_here
+```
+
+Make sure `.env` is included in your `.gitignore`.
+
+---
+
+## Running the Application
 
 ```bash
 streamlit run app.py
 ```
 
-**4. In the browser tab that opens:**
-
-- Paste your API key into the sidebar
-- Upload `sample_docs/sample.txt` (or any PDF/TXT you like)
-- Click **Build Index**
-- Ask a question, e.g. *"What happens during the Calvin cycle?"*
-
-The first run will download the embedding model (~90MB) — this needs an internet connection once, then it's cached locally.
+The application will launch in your browser.
 
 ---
 
-## Deploying it for free (so recruiters can actually try it)
+## Example Workflow
 
-**Option A — Hugging Face Spaces (recommended, free, easiest):**
+### Upload Documents
 
-1. Create a free account at https://huggingface.co
-2. Create a new **Space** → choose **Streamlit** as the SDK
-3. Upload `app.py`, `rag_pipeline.py`, `requirements.txt`
-4. In Space settings, add `ANTHROPIC_API_KEY` as a secret so it's not hardcoded
-5. Your app gets a public URL you can put directly in your resume/LinkedIn
+Upload one or more PDF or TXT files.
 
-**Option B — Streamlit Community Cloud:**
+### Ask Questions
 
-1. Push this folder to a public GitHub repo
-2. Go to https://streamlit.io/cloud → connect your GitHub → deploy
-3. Add your API key under app secrets
+Example queries:
 
-Either way, put the **live link** in your resume, not just the GitHub repo — recruiters are far more likely to click a working demo than clone a repo.
+```text
+What are the key topics discussed in this document?
+```
 
----
+```text
+Summarize the main findings.
+```
 
-## Ideas to extend this (good talking points in interviews)
+```text
+What recommendations are provided?
+```
 
-- **Swap FAISS for a hosted vector DB** (Pinecone, Weaviate, Chroma Cloud) — shows you understand scaling beyond a local index
-- **Add conversation memory** so follow-up questions ("what about the second stage?") work without repeating context
-- **Add a "confidence" or "no answer found" check** — if retrieved chunks have low similarity scores, tell the user instead of forcing an answer
-- **Support more file types**: .docx, .csv, web pages via URL
-- **Add evaluation**: a small set of Q&A pairs to measure retrieval accuracy (this is a big deal in real RAG systems and shows maturity if you mention it)
-- **Re-ranking**: after retrieving top-k chunks with FAISS, re-rank them with a cross-encoder for better precision
+### Receive Answers
+
+The system retrieves relevant document sections and generates a grounded response using Gemini.
 
 ---
 
-## What to say about this project on your resume / in interviews
+## Why This Project?
 
-> "Built an end-to-end RAG (Retrieval-Augmented Generation) Q&A system that lets users query custom documents. Implemented the full pipeline — chunking, embedding with sentence-transformers, similarity search with FAISS, and grounded answer generation with Claude — and deployed it as a public Streamlit app on Hugging Face Spaces."
+Large Language Models are powerful, but they cannot reliably answer questions about private or custom documents without access to the relevant information.
 
-That one sentence signals: you understand embeddings, vector search, LLM prompting, and deployment — which is exactly the GenAI skill set companies are screening for right now.
+This project demonstrates how Retrieval-Augmented Generation (RAG) can be used to bridge that gap by combining:
+
+* Information Retrieval
+* Semantic Search
+* Vector Databases
+* Embeddings
+* Large Language Models
+
+The result is a system capable of answering questions based on user-provided knowledge rather than relying solely on the model's training data.
+
+---
+
+## Skills Demonstrated
+
+* Retrieval-Augmented Generation (RAG)
+* Semantic Search
+* Vector Databases (FAISS)
+* Embedding Models
+* Large Language Models (Gemini)
+* Prompt Engineering
+* Information Retrieval
+* Streamlit Development
+* Python Application Design
+
+---
+
+## Future Improvements
+
+* Persistent vector storage
+* Multi-document collections
+* Conversation memory
+* Hybrid search (BM25 + Vector Search)
+* Source citations with confidence scores
+* Docker deployment
+* FastAPI backend
+* User authentication
+
+---
+
+## Security
+
+API keys and credentials are never stored in the repository.
+
+Sensitive configuration should be managed through environment variables and a local `.env` file that is excluded from version control.
+
+---
+
+## Author
+
+**Tanaya**
+
+Built as a learning project to explore Retrieval-Augmented Generation (RAG), semantic search, vector databases, and LLM-powered question answering.
